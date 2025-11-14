@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NutriMeal-AI | AI-Powered Recipe Ingredient Extractor</title>
+    <meta name="description" content="Extract and analyze structured ingredients from your recipes with AI-powered NutriMeal-AI.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='icons/fruit.svg') }}">
+</head>
+<body>
+    <div class="page-container">
+        <div class="container">
+            <!-- Hero Section -->
+            <div class="hero-section">
+                <div class="icon-wrapper">
+                    <span class="icon-emoji">🥗</span>
+                </div>
+                <h1 class="hero-title">NutriMeal-AI</h1>
+                <p class="hero-subtitle">Extract structured ingredients from your recipe with AI-powered analysis</p>
+            </div>
+
+            <!-- Form Section -->
+            <div class="form-card">
+                <form action="/analyze" method="POST">
+                    <div class="form-group">
+                        <label for="recipe" class="form-label">Paste your recipe below</label>
+                        <textarea 
+                            id="recipe" 
+                            name="recipe" 
+                            class="form-textarea"
+                            placeholder="Example:&#10;2 cups all-purpose flour&#10;1 tsp salt&#10;3 large eggs&#10;1/2 cup milk"
+                            required>{{ recipe if recipe else '' }}</textarea>
+                    </div>
+                    
+                    <button type="submit" class="btn-primary" {% if is_analyzing %}disabled{% endif %}>
+                        {% if is_analyzing %}
+                            <span class="loading-text">
+                                <span class="pulse">Analyzing</span>
+                                <span class="bounce">...</span>
+                            </span>
+                        {% else %}
+                            Analyze Ingredients
+                        {% endif %}
+                    </button>
+                </form>
+            </div>
+
+            <!-- Error Message -->
+            {% if error %}
+                <div class="error-message">{{ error }}</div>
+            {% endif %}
+
+            <!-- Results Section -->
+            {% if ingredients %}
+                <div class="results-section">
+                    <div class="results-header">
+                        <div class="header-accent"></div>
+                        <h2 class="results-title">Extracted Ingredients</h2>
+                    </div>
+                    
+                    <div class="ingredients-list">
+                        {% for line in ingredients %}
+                            <div class="ingredient-card">
+                                <div class="ingredient-content">
+                                    {% if line.entities %}
+                                        {% for token, label in line.entities %}
+                                            <span class="badge badge-{{ label|lower }}">
+                                                {{ token }} : {{ label }}
+                                            </span>
+                                        {% endfor %}
+
+                                        <!-- {% for entity in line.entities %}
+                                            <span class="badge badge-{{ entity.label|lower }}">
+                                                {{ entity.token }}
+                                            </span>
+                                        {% endfor %} -->
+                                    {% else %}
+                                        <p class="no-ingredients">No valid ingredients found.</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Legend -->
+                    <div class="legend-card">
+                        <h3 class="legend-title">Label Guide</h3>
+                        <div class="legend-items">
+                            <div class="legend-item">
+                                <div class="legend-dot legend-dot-quantity"></div>
+                                <span class="legend-text">Quantity</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-dot legend-dot-unit"></div>
+                                <span class="legend-text">Unit</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-dot legend-dot-name"></div>
+                                <span class="legend-text">Name</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-dot legend-dot-comment"></div>
+                                <span class="legend-text">Comment</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>
